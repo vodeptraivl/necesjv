@@ -3,6 +3,8 @@ import java.io.*;
 
 import org.apache.commons.io.FileUtils;
 
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -114,5 +116,74 @@ public class NecesFile {
     public String byteArray2B64(byte[] bytes) throws IOException {
         return URLEncoder.encode(Base64.getEncoder().encodeToString(bytes), "UTF-8");
 
+    }
+    private final static int BUF_SIZE_1KB = 1024;
+    public static final String REGEX_FILE_NAME = "^%s[_][0-9]*[_][0-9]{2}$";
+    private void saveFileToDisk(byte[] fileByte, String fileName, String pathFileTemp) throws Exception {
+        BufferedInputStream is = null;
+        BufferedOutputStream os = null;
+        try {
+            // Create Path File Temp Directory
+            File outputDirectory = new File(pathFileTemp);
+            if(!outputDirectory.exists()) {
+                outputDirectory.mkdirs();
+            }
+
+            is = new BufferedInputStream(new ByteArrayInputStream(fileByte));
+            os = new BufferedOutputStream(
+                    new FileOutputStream(new File(String.join(File.separator, pathFileTemp, fileName))));
+            // Append Byte To File
+            byte[] buf = new byte[BUF_SIZE_1KB];
+
+            int ret = -1;
+            while((ret = is.read(buf)) > 0) {
+                os.write(buf, 0, ret);
+                os.flush();
+            }
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if(is != null) is.close();
+            if(os != null) os.close();
+        }
+    }
+
+    private void ProcessFileUpload(String fileName, String pathFileTemp, String pathDirectoryUpload) throws Exception {
+        // Create file upload
+        String pathFileNameUpload = String.join(File.separator,
+                pathDirectoryUpload,
+                fileName);
+        BufferedOutputStream outStream = new BufferedOutputStream(
+                new FileOutputStream(pathFileNameUpload));
+        try {
+            File od = new File(pathFileTemp);
+            FileUtil fileUtils = new FileUtil();
+
+            // Get all file temp
+            String regexWithFileName = String.format(REGEX_FILE_NAME, fileName);
+            String[] fs = od.list(new FilenameFilter(){
+                public boolean accept(File dir, String name) {
+                    return name.matches(regexWithFileName);
+                }
+            });
+
+            // Sort file name
+            Arrays.sort(fs);
+
+            //Read file temp append to file upload
+            for(final String fileNameTemp : fs) {
+                // Read file temp to byte
+                File fileTemp = new File(String.join(File.separator, pathFileTemp, fileNameTemp));
+                byte[] fileContent = Files.readAllBytes(fileTemp.toPath());
+
+                // Append byte file temp to output stream
+                fileUtils.join(fileContent, outStream);
+            }
+        } catch(Exception ex) {
+            throw ex;
+        }
+        finally {
+            outStream.close();
+        }
     }
 }

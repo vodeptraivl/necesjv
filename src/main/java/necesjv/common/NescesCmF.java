@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Date;
 
 public class NescesCmF {
     private static volatile SecureRandom numberGenerator = null;
@@ -228,5 +229,43 @@ public class NescesCmF {
         return result;
     }
 
+    public Long getTimeKey(Date date, Integer otp_valid_for_secs) {
+        if(date == null) date = new Date();
+        if(otp_valid_for_secs == null) otp_valid_for_secs = 30;
+        return (long) Math.floor(Math.floor(date.getTime() / 1000) / otp_valid_for_secs);
+    }
 
+    public String OTP(String secret_key, Integer otp_valid_for_secs, Date date, Integer lengthToken) {
+        if (secret_key == null) {
+            return null;
+        }
+        if(date == null) date = new Date();
+        if(otp_valid_for_secs == null) otp_valid_for_secs = 30;
+        if(lengthToken == null) lengthToken = 6;
+        Long timeKey = this.getTimeKey(date,otp_valid_for_secs);
+        String hashed_value = getSha256(timeKey + secret_key + "vola");
+        String last_six_characters = hashed_value.substring(hashed_value.length() - (lengthToken == 6 ? 5 : 6));
+        Integer otp = Integer.parseInt(last_six_characters, 16);
+        String otp_string = otp.toString();
+        if(otp_string.length() > lengthToken){
+            otp_string = otp_string.substring(otp_string.length() - lengthToken,otp_string.length());
+        }
+        while (otp_string.length() < lengthToken) {
+            otp_string = "0" + otp_string;
+        }
+        return otp_string;
+    }
+
+    public boolean checkOTP(String otp, String secret_key,  Integer otp_valid_for_secs, Date date, Integer lengthToken) {
+        if (otp == null) {
+            return false;
+        }
+        if (secret_key == null) {
+            return false;
+        }
+        if(date == null) date = new Date();
+        if(otp_valid_for_secs == null) otp_valid_for_secs = 30;
+        if(lengthToken == null) lengthToken = 6;
+        return otp == this.OTP(secret_key, otp_valid_for_secs, date, lengthToken);
+    }
 }
