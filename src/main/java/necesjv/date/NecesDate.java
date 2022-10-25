@@ -255,27 +255,14 @@ public class NecesDate {
                     ihour = PatternDate.spatternDate[i].indexOf("HH"),
                     iminute = PatternDate.spatternDate[i].indexOf("MI"),
                     isecond = PatternDate.spatternDate[i].indexOf("SS");
-                if(iYear > -1){
-                    res.setYear(value.substring(iYear,iYear+4));
-                }
-                if(iMonth > -1){
-                    res.setMonth(value.substring(iMonth,iMonth+2));
-                }
-                if(iday > -1){
-                    res.setDay(value.substring(iday,iday+2));
-                }
-                if(ihour > -1){
-                    res.setHour(value.substring(ihour,ihour+2));
-                }
-                if(iminute > -1){
-                    res.setMinute(value.substring(iminute,iminute+2));
-                }
-                if(isecond > -1){
-                    res.setSecond(value.substring(isecond,isecond+2));
-                }
-                if(iMonth == -1 && iM > -1){
-                    res.setMonth('0'+value.substring(iM,iM+1));
-                }
+                res.setYear((iYear > -1) ? value.substring(iYear,iYear+4) : "");
+                res.setMonth((iMonth > -1) ? value.substring(iMonth,iMonth+2) : "");
+                res.setDay((iday > -1) ? value.substring(iday,iday+2) : "");
+                res.setHour((ihour > -1) ? value.substring(ihour,ihour+2) : "");
+                res.setMinute((iminute > -1)?value.substring(iminute,iminute+2):"");
+                res.setSecond((isecond > -1) ? value.substring(isecond,isecond+2):"");
+                res.setMonth((iMonth == -1 && iM > -1)?('0'+value.substring(iM,iM+1)):"");
+
                 return res;
             }
         }
@@ -289,5 +276,44 @@ public class NecesDate {
             return null;
         }
 
+    }
+
+    public String dateStrFormat(String date, String pattern) {
+        if(pattern == null) pattern = "mm/dd";
+        if (date == null || date == "") {
+            return "";
+        };
+        pattern = pattern.toLowerCase();
+        ExtractDate extractDate = this.extracDateStr(date);
+        if(extractDate != null){
+            String dateFm = pattern;
+            dateFm = dateFm.replace("yyyy",extractDate.getYear());
+            dateFm = dateFm.replace("mm",extractDate.getMonth());
+            dateFm = dateFm.replace("dd",extractDate.getDay());
+            dateFm = dateFm.replace("hh",extractDate.getHour());
+            dateFm = dateFm.replace("mi",extractDate.getMinute());
+            dateFm = dateFm.replace("ss",extractDate.getSecond());
+            return dateFm;
+        }else{
+            return "";
+        }
+    }
+
+    public Date roundDate(Date date , boolean end) {
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        date.setTime(0);
+        if (end) {
+            date.setDate(date.getDate() + 1);
+            date.setTime(date.getTime() - 1000);
+        }
+        return date;
+    }
+
+    public double getDayBetween2Date(Date date1, Date date2) {
+        double diffInTime = date2.getTime() - date1.getTime();
+        double diffInDays = diffInTime / (1000 * 3600 * 24);
+        return diffInDays;
     }
 }
