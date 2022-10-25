@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group 'necesjv'
+version '0.0.1'
+jar{
+    enabled = true
+}
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+    compileOnly 'commons-io:commons-io:2.6'
+}
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/vodeptraivl/necesjv")
+            credentials {
+                username = USERNAME
+                password = TOKEN
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
