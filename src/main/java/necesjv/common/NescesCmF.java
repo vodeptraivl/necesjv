@@ -14,7 +14,10 @@ import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class NescesCmF {
     private static volatile SecureRandom numberGenerator = null;
@@ -267,5 +270,11 @@ public class NescesCmF {
         if(otp_valid_for_secs == null) otp_valid_for_secs = 30;
         if(lengthToken == null) lengthToken = 6;
         return otp == this.OTP(secret_key, otp_valid_for_secs, date, lengthToken);
+    }
+
+    public String[] uniqueItem(String[] data){
+        Set<String> temp = new LinkedHashSet<String>(Arrays.asList(data));
+        data = temp.toArray( new String[temp.size()]);
+        return data;
     }
 }
